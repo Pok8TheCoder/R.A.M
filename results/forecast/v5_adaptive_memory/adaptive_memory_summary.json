@@ -1,0 +1,21 @@
+{
+  "frozen": {
+    "mean_mse": 0.33475984515996066,
+    "n_captures": 11
+  },
+  "adaptive": {
+    "mean_mse": 0.3346503373002465,
+    "n_captures": 11
+  },
+  "adaptive_memory": {
+    "mean_mse": 0.2613904994603614,
+    "n_captures": 11
+  },
+  "retrieval": {
+    "n_surprise_events": 28,
+    "n_matched": 28,
+    "n_correct": 19,
+    "accuracy": 0.6785714285714286,
+    "match_thresh": 24.078015794331954
+  }
+}

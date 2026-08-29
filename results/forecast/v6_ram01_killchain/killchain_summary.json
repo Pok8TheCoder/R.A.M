@@ -1,0 +1,202 @@
+{
+  "overall_mse": {
+    "Temporal-Y": 8.52151596000307,
+    "RAM.01": 8.129420632881155,
+    "Temporal-A": 6.5188892203251365
+  },
+  "segment_mse": {
+    "Temporal-Y": {
+      "Benign": 6.203028155586938,
+      "T1595_active_scan": 4.219968337886262,
+      "T1499_http_flood": 34.75184406057125,
+      "T1498_network_dos": 1.0873632343447674
+    },
+    "RAM.01": {
+      "Benign": 6.455074614494718,
+      "T1595_active_scan": 4.178666056232521,
+      "T1499_http_flood": 31.188291980639587,
+      "T1498_network_dos": 0.992728798378287
+    },
+    "Temporal-A": {
+      "Benign": 7.8216534354044525,
+      "T1595_active_scan": 3.36206739139388,
+      "T1499_http_flood": 15.484001672777651,
+      "T1498_network_dos": 1.305658523807912
+    }
+  },
+  "segments": [
+    [
+      "Benign",
+      0,
+      98
+    ],
+    [
+      "T1595_active_scan",
+      98,
+      346
+    ],
+    [
+      "Benign",
+      346,
+      444
+    ],
+    [
+      "T1499_http_flood",
+      444,
+      564
+    ],
+    [
+      "Benign",
+      564,
+      662
+    ],
+    [
+      "T1498_network_dos",
+      662,
+      904
+    ],
+    [
+      "Benign",
+      904,
+      1002
+    ]
+  ],
+  "retrieval_events": [
+    {
+      "step": 98,
+      "true_label": "T1595_active_scan",
+      "retrieved_label": "T1021_remote_services",
+      "distance": 65.88077155786199,
+      "match": false
+    },
+    {
+      "step": 139,
+      "true_label": "T1595_active_scan",
+      "retrieved_label": "T1595_active_scan",
+      "distance": 13.94880938349173,
+      "match": true
+    },
+    {
+      "step": 166,
+      "true_label": "T1595_active_scan",
+      "retrieved_label": "T1498_network_dos",
+      "distance": 18.656384519104776,
+      "match": true
+    },
+    {
+      "step": 241,
+      "true_label": "T1595_active_scan",
+      "retrieved_label": "T1595_active_scan",
+      "distance": 3.7101755777561682,
+      "match": true
+    },
+    {
+      "step": 373,
+      "true_label": "Benign",
+      "retrieved_label": "Benign",
+      "distance": 21.67224179842531,
+      "match": true
+    },
+    {
+      "step": 409,
+      "true_label": "Benign",
+      "retrieved_label": "T1021_remote_services",
+      "distance": 4.496901308082109,
+      "match": true
+    },
+    {
+      "step": 445,
+      "true_label": "T1499_http_flood",
+      "retrieved_label": "Benign",
+      "distance": 170.94647937365525,
+      "match": false
+    },
+    {
+      "step": 499,
+      "true_label": "T1499_http_flood",
+      "retrieved_label": "T1499_http_flood",
+      "distance": 180.24366104251442,
+      "match": false
+    },
+    {
+      "step": 539,
+      "true_label": "T1499_http_flood",
+      "retrieved_label": "T1499_http_flood",
+      "distance": 0.7508534258752902,
+      "match": true
+    },
+    {
+      "step": 575,
+      "true_label": "Benign",
+      "retrieved_label": "Benign",
+      "distance": 16.06860824160243,
+      "match": true
+    },
+    {
+      "step": 618,
+      "true_label": "Benign",
+      "retrieved_label": "T1595_active_scan",
+      "distance": 35.71641741832558,
+      "match": false
+    },
+    {
+      "step": 659,
+      "true_label": "Benign",
+      "retrieved_label": "T1021_remote_services",
+      "distance": 61.630407048919125,
+      "match": false
+    },
+    {
+      "step": 662,
+      "true_label": "T1498_network_dos",
+      "retrieved_label": "T1595_active_scan",
+      "distance": 33.07192720579761,
+      "match": false
+    },
+    {
+      "step": 739,
+      "true_label": "T1498_network_dos",
+      "retrieved_label": "T1499_http_flood",
+      "distance": 17.719123425218378,
+      "match": true
+    },
+    {
+      "step": 751,
+      "true_label": "T1498_network_dos",
+      "retrieved_label": "T1498_network_dos",
+      "distance": 9.41365092143624,
+      "match": true
+    },
+    {
+      "step": 831,
+      "true_label": "T1498_network_dos",
+      "retrieved_label": "T1498_network_dos",
+      "distance": 9.45258731646856,
+      "match": true
+    },
+    {
+      "step": 899,
+      "true_label": "T1498_network_dos",
+      "retrieved_label": "T1498_network_dos",
+      "distance": 20.840065877827527,
+      "match": true
+    },
+    {
+      "step": 909,
+      "true_label": "Benign",
+      "retrieved_label": "Benign",
+      "distance": 27.68154831546908,
+      "match": true
+    },
+    {
+      "step": 955,
+      "true_label": "Benign",
+      "retrieved_label": "T1021_remote_services",
+      "distance": 15.039848511314084,
+      "match": true
+    }
+  ],
+  "n_anomalies": 19,
+  "match_thresh": 27.72245275865558,
+  "anomaly_thresh": 0.4186505625443242
+}
