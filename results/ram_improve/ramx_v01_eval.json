@@ -1,0 +1,35 @@
+[
+  {
+    "variant": "V0_frozen",
+    "binary_f1": 0.6956521739130435,
+    "binary_precision": 0.975609756097561,
+    "binary_recall": 0.5405405405405406,
+    "binary_fpr": 0.003067484662576687,
+    "mitre_f1_macro": 0.878960791942247,
+    "dynamics_mse": 258.176137534827,
+    "elapsed_sec": 2.7,
+    "n_steps": 400
+  },
+  {
+    "variant": "V10_mt_mem_hidden_k3",
+    "binary_f1": 0.7317073170731707,
+    "binary_precision": 0.9183673469387755,
+    "binary_recall": 0.6081081081081081,
+    "binary_fpr": 0.012269938650306749,
+    "mitre_f1_macro": 0.8674332483176991,
+    "dynamics_mse": 258.17499429644784,
+    "elapsed_sec": 7.3,
+    "n_steps": 400
+  },
+  {
+    "variant": "RAMX_V.01",
+    "binary_f1": 0.7559055118110236,
+    "binary_precision": 0.9056603773584906,
+    "binary_recall": 0.6486486486486487,
+    "binary_fpr": 0.015337423312883436,
+    "mitre_f1_macro": 0.8742857142857143,
+    "dynamics_mse": 258.17496860862707,
+    "elapsed_sec": 7.6,
+    "n_steps": 400
+  }
+]

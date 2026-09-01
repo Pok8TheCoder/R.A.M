@@ -7,6 +7,8 @@ fixes found in scripts/ram_improve_eval.py:
                  classify-blend (the ~0-1% no-op from results/forecast/v8_*)
   V8          -- memory-only classify-blend, raw-window keys, top-1 NN, NO TTT
   V10         -- multi-task TTT + memory classify-blend, hidden-state keys, k=3
+  RAMX_V.01   -- V10 + rolling benign baseline (20 slots, quintile cascade) +
+                gated dynamic tier for suspicious/attack windows only
 
 Timeline: the same synthetic kill-chain splice the dashboard uses
 (`forecast_sessions.build_timeline`) at 1000 steps -- real held-out CIC
@@ -41,6 +43,7 @@ from scripts.ram_improve_eval import (  # noqa: E402
     infer,
     load_model,
     run_variant,
+    run_variant_ramx,
 )
 from src.aryan.constants import STAGE_ID_TO_ATTACK  # noqa: E402
 from src.aryan.dataset import load_all_splits  # noqa: E402
@@ -108,6 +111,17 @@ def main():
         print(f"  F1={r['binary_f1']:.3f} Prec={r['binary_precision']:.3f} "
               f"Rec={r['binary_recall']:.3f} FPR={r['binary_fpr']:.3f} "
               f"MitreF1={r['mitre_f1_macro']:.3f}  ({r['elapsed_sec']:.1f}s)")
+
+    print(f"Running RAMX_V.01 on {TARGET_LEN}-step timeline...")
+    r_ramx, p_atts, p_mits = run_variant_ramx(
+        "RAMX_V.01", base_model, full, bin_labels, mit_labels,
+        match_thresh=hidden_thresh, knn_k=3, capture_series=True,
+    )
+    results.append(r_ramx)
+    series["RAMX_V.01"] = {"p_atts": p_atts, "p_mits": p_mits}
+    print(f"  F1={r_ramx['binary_f1']:.3f} Prec={r_ramx['binary_precision']:.3f} "
+          f"Rec={r_ramx['binary_recall']:.3f} FPR={r_ramx['binary_fpr']:.3f} "
+          f"MitreF1={r_ramx['mitre_f1_macro']:.3f}  ({r_ramx['elapsed_sec']:.1f}s)")
 
     (OUT_DIR / "1000step_metrics.json").write_text(json.dumps(results, indent=2))
 
@@ -236,7 +250,7 @@ def plot_bars(results, out_path):
     metrics = ["binary_f1", "binary_precision", "binary_recall", "binary_fpr", "mitre_f1_macro"]
     metric_labels = ["Bin F1", "Precision", "Recall", "FPR", "MITRE F1"]
     names = [r["variant"] for r in results]
-    colors = ["#7f8c8d", "#8e44ad", "#27ae60", "#e67e22"]
+    colors = ["#7f8c8d", "#8e44ad", "#27ae60", "#e67e22", "#3498db"]
 
     fig, axes = plt.subplots(1, len(metrics), figsize=(18, 4.5))
     fig.patch.set_facecolor("#0d1117")
@@ -265,7 +279,7 @@ def plot_bars(results, out_path):
 def plot_timeline(x, tb_full, series, attack_segments, out_path):
     names = list(series.keys())
     colors = {"base": "#7f8c8d", "orig_ram": "#8e44ad", "V8_mem_raw_k1": "#27ae60",
-              "V10_mt_mem_hidden_k3": "#e67e22"}
+              "V10_mt_mem_hidden_k3": "#e67e22", "RAMX_V.01": "#3498db"}
 
     fig, axes = plt.subplots(len(names), 1, figsize=(16, 2.6 * len(names)), sharex=True)
     fig.patch.set_facecolor("#0d1117")

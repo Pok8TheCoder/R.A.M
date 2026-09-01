@@ -47,12 +47,16 @@ scripts/
   train_temporal_forecaster_ctx60.py   # trains it with context=60/horizon=40 (matches the kill-chain benchmark)
   adaptive_memory_forecaster.py        # RAM.01 core: EpisodicMemoryBank + OnlineAdaptive (TTT) + the v5 experiment
   ram01_kill_chain_eval.py             # the v6 benchmark: RAM.01 vs frozen GRU on a synthetic 1000-step multi-attack timeline
-  ram_improve_eval.py                  # ARY.01 RAM variant sweep (V0–V11): TTT loss, memory keys, k-NN classify-blend
-  ram_1000step_eval.py                 # 1000-step kill-chain P(attack) comparison: base vs orig RAM vs V8 vs V10
+  ram_improve_eval.py                  # ARY.01 RAM variant sweep (V0–V12): TTT loss, memory keys, k-NN classify-blend
+  ram_1000step_eval.py                 # 1000-step kill-chain P(attack) comparison: base vs orig RAM vs V8 vs V10 vs RAMX
+  ramx_v01_eval.py                     # focused V0 / V10 / RAMX_V.01 comparison on CIC test (+ optional 1000-step)
   timesfm_ram_compare.py               # ARY base/V8/V10 vs Google TimesFM-3 (+ RAM-wrapped TimesFM) on feature forecasts
 src/aryan/
   world_model.py, components.py, ...   # ARY.01 242-d temporal transformer backbone RAM wraps in the v7+ experiments
+  streaming_variants.py                # RAMX_V.01: RAMXMemoryBank, TieredMemoryBank, StreamingARYRamxV01 (+ FM hybrids)
   timeline.py                          # synthetic kill-chain splice builder (shared by eval scripts)
+docs/
+  RAMX_V01.md                          # RAMX_V.01 design, API, and empirical notes
 data/aryan_splits/                     # CIC-IDS-2018 train/val/test NPZ windows for ARY-RAM evals
 models/checkpoints/
   forecast_v2_temporal*.pth, forecast_amt_temporal_ctx60.pth   # trained GRU backbone weights
@@ -146,6 +150,27 @@ RAM's *continuation-blend* (the original v5/v6 design) still degrades feature
 MSE when applied to TimesFM or ARY dynamics rollouts — the classify-blend fix
 (V8/V10) is the one that helps attack detection. See `timesfm_compare_*.png`.
 
+### v9 — RAMX_V.01 (rolling benign baseline + gated dynamic tier)
+
+Follow-up to V10 for **long-run streaming** where flat memory dilutes attack
+votes after 100+ benign windows. See [`docs/RAMX_V01.md`](docs/RAMX_V01.md).
+
+| component | behavior |
+|---|---|
+| Baseline (20 slots) | 4 quintiles × 5; writes start in Q4; cascade every 100 benign steps |
+| Dynamic tier | Suspicious (`P(attack)≥0.01`) or attack only; 20→40 slots on first attack |
+| Classify-blend | Same hidden-key k=3 path as V10 |
+
+On PRISM live-lab HTTP zero-days (Sep 2026): `ary_ramx_v01` mean F1 **1.000**
+vs `ary_base` **0.000**; rescues OOD recall where raw classifier stays ~0.001.
+RAMX requires hidden keys + low raw scores — it does not help miscalibrated
+models (SHNV adapter) or FM hybrids on raw-window keys.
+
+```bash
+python -m scripts.ramx_v01_eval.py
+python -m scripts.ramx_v01_eval.py --timeline   # + 1000-step kill-chain plots
+```
+
 **Honest takeaway:** the gains are real but modest, and concentrated on the
 *attack* segments (where the "recognize a recurring shape" mechanism has
 something to grab onto) rather than benign background (which doesn't repeat
@@ -189,6 +214,10 @@ python -m scripts.ram01_kill_chain_eval
 # v7: ARY.01 RAM variant sweep + 1000-step P(attack) comparison
 python -m scripts.ram_improve_eval
 python -m scripts.ram_1000step_eval
+
+# v9: RAMX_V.01 rolling baseline memory (V0 / V10 / RAMX on test split)
+python -m scripts.ramx_v01_eval.py
+python -m scripts.ramx_v01_eval.py --timeline
 
 # v8: ARY vs Google TimesFM-3 feature forecast (default: highest-variance dim)
 python -m scripts.timesfm_ram_compare

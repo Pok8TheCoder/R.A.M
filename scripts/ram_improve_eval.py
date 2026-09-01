@@ -39,6 +39,7 @@ sys.path.insert(0, str(ROOT))
 
 from src.aryan.components import MultiTaskLoss  # noqa: E402
 from src.aryan.dataset import load_all_splits  # noqa: E402
+from src.aryan.streaming_variants import RAMXMemoryBank, _classify_blend  # noqa: E402
 from src.aryan.world_model import TemporalTransformerWorldModel  # noqa: E402
 
 CKPT = ROOT / "models" / "checkpoints" / "aryan_world_model_best.pt"
@@ -218,6 +219,111 @@ def run_variant(name: str, base_model: nn.Module, states: np.ndarray, bin_labels
     }
 
 
+def run_variant_ramx(
+    name: str,
+    base_model: nn.Module,
+    states: np.ndarray,
+    bin_labels: np.ndarray,
+    mit_labels: np.ndarray,
+    *,
+    match_thresh: float,
+    knn_k: int = 3,
+    rotation_interval: int = 100,
+    dynamic_capacity_pre: int = 20,
+    dynamic_capacity_post: int = 40,
+    suspicious_thresh: float = 0.01,
+    capture_series: bool = False,
+) -> dict | tuple[dict, np.ndarray, np.ndarray]:
+    """V10 backbone + RAMX_V.01 rolling benign baseline (batch replay)."""
+    t0 = time.time()
+    online = copy.deepcopy(base_model)
+    base_params = [p.clone().detach() for p in base_model.parameters()]
+    opt = torch.optim.SGD(online.parameters(), lr=ADAPT_LR)
+    mse = nn.MSELoss()
+    mt_loss = MultiTaskLoss(lambda_dynamics=0.5, lambda_infiltration=1.2, lambda_mitre=1.0)
+
+    bank = RAMXMemoryBank(
+        rotation_interval=rotation_interval,
+        dynamic_capacity_pre=dynamic_capacity_pre,
+        dynamic_capacity_post=dynamic_capacity_post,
+        suspicious_thresh=suspicious_thresh,
+    )
+    n = len(states)
+    p_atts, tb_list, p_mits, tm_list = [], [], [], []
+    dyn_errs = []
+    seqs_buf, next_buf, tb_buf, tm_buf = [], [], [], []
+
+    online.eval()
+    for t in range(CONTEXT - 1, n - 1):
+        seq = states[t - CONTEXT + 1 : t + 1]
+        online.eval()
+        out = infer(online, seq)
+        p_att_raw, p_mit_raw, hidden, pred_state = out["p_att"], out["p_mit"], out["hidden"], out["pred_state"]
+        true_next = states[t + 1]
+        tb, tm = int(bin_labels[t + 1]), int(mit_labels[t + 1])
+        key = hidden
+
+        p_att, p_mit = p_att_raw, p_mit_raw
+        if len(bank) > 0:
+            p_att, p_mit = _classify_blend(bank, key, p_att_raw, p_mit_raw, knn_k, match_thresh)
+
+        p_atts.append(p_att)
+        tb_list.append(tb)
+        p_mits.append(p_mit)
+        tm_list.append(tm)
+        dyn_errs.append(float(np.mean((pred_state - true_next) ** 2)))
+
+        bank.ingest(key, tb, tm, p_att_raw)
+
+        seqs_buf.append(seq)
+        next_buf.append(true_next)
+        tb_buf.append(tb)
+        tm_buf.append(tm)
+        if len(seqs_buf) >= ADAPT_EVERY:
+            online.train()
+            seqs_t = torch.from_numpy(np.stack(seqs_buf).astype(np.float32))
+            next_t = torch.from_numpy(np.stack(next_buf).astype(np.float32))
+            tb_t = torch.tensor(tb_buf, dtype=torch.long)
+            tm_t = torch.tensor(tm_buf, dtype=torch.long)
+            for _ in range(ADAPT_STEPS):
+                opt.zero_grad()
+                out_a = online(seqs_t)
+                ld = mt_loss(
+                    out_a["pred_state_mean"], out_a["pred_state_logvar"], next_t,
+                    out_a["pred_binary"], tb_t, out_a["pred_mitre"], tm_t,
+                )
+                reg = sum(((p - b) ** 2).sum() for p, b in zip(online.parameters(), base_params))
+                (ld["total"] + PULLBACK * reg).backward()
+                opt.step()
+            seqs_buf, next_buf, tb_buf, tm_buf = [], [], [], []
+
+    p_atts_arr = np.array(p_atts)
+    tb_arr = np.array(tb_list)
+    pred_bin = (p_atts_arr > 0.5).astype(int)
+    prec, rec, f1, _ = precision_recall_fscore_support(tb_arr, pred_bin, average="binary", zero_division=0)
+    tn = int(((pred_bin == 0) & (tb_arr == 0)).sum())
+    fp = int(((pred_bin == 1) & (tb_arr == 0)).sum())
+    fpr = fp / max(fp + tn, 1)
+    mit_pred = np.array([int(np.argmax(p)) for p in p_mits])
+    tm_arr = np.array(tm_list)
+    mit_f1 = f1_score(tm_arr, mit_pred, average="macro", zero_division=0)
+
+    metrics = {
+        "variant": name,
+        "binary_f1": float(f1),
+        "binary_precision": float(prec),
+        "binary_recall": float(rec),
+        "binary_fpr": float(fpr),
+        "mitre_f1_macro": float(mit_f1),
+        "dynamics_mse": float(np.mean(dyn_errs)),
+        "elapsed_sec": round(time.time() - t0, 1),
+        "n_steps": len(p_atts),
+    }
+    if capture_series:
+        return metrics, p_atts_arr, np.stack(p_mits)
+    return metrics
+
+
 def main():
     # ARY.01's forward pass expects RAW (unstandardized) states -- confirmed
     # from forecast_sessions.py, which never scales `full`/`val_states` before
@@ -312,6 +418,10 @@ def main():
     results.append(run_variant("V11_frozen_mem_hidden_k1", base_model, te_s, te_b, te_m,
                                 adapt=False, loss_type="mse", use_memory=True,
                                 key_space="hidden", knn_k=1, match_thresh=hidden_thresh))
+
+    print("Running V12 RAMX_V.01 (V10 + rolling benign baseline + gated dynamic tier)...")
+    results.append(run_variant_ramx("V12_ramx_v01", base_model, te_s, te_b, te_m,
+                                    match_thresh=hidden_thresh, knn_k=3))
 
     OUT.parent.mkdir(parents=True, exist_ok=True)
     OUT.write_text(json.dumps(results, indent=2))
