@@ -1,0 +1,46 @@
+[
+  {
+    "variant": "base",
+    "binary_f1": 0.7327586206896551,
+    "binary_precision": 0.8673469387755102,
+    "binary_recall": 0.6343283582089553,
+    "binary_fpr": 0.015402843601895734,
+    "mitre_f1_macro": 0.2882383279715066,
+    "dynamics_mse": 248.97044549813657,
+    "elapsed_sec": 3.9,
+    "n_steps": 978
+  },
+  {
+    "variant": "orig_ram",
+    "binary_f1": 0.7264957264957265,
+    "binary_precision": 0.85,
+    "binary_recall": 0.6343283582089553,
+    "binary_fpr": 0.017772511848341232,
+    "mitre_f1_macro": 0.2920242679870408,
+    "dynamics_mse": 248.96040801454578,
+    "elapsed_sec": 15.0,
+    "n_steps": 978
+  },
+  {
+    "variant": "V8_mem_raw_k1",
+    "binary_f1": 0.6666666666666666,
+    "binary_precision": 0.6291390728476821,
+    "binary_recall": 0.7089552238805971,
+    "binary_fpr": 0.06635071090047394,
+    "mitre_f1_macro": 0.5753016059344606,
+    "dynamics_mse": 248.97044549813657,
+    "elapsed_sec": 14.5,
+    "n_steps": 978
+  },
+  {
+    "variant": "V10_mt_mem_hidden_k3",
+    "binary_f1": 0.7966101694915254,
+    "binary_precision": 0.9215686274509803,
+    "binary_recall": 0.7014925373134329,
+    "binary_fpr": 0.009478672985781991,
+    "mitre_f1_macro": 0.4794020627943745,
+    "dynamics_mse": 248.9750296776702,
+    "elapsed_sec": 16.3,
+    "n_steps": 978
+  }
+]

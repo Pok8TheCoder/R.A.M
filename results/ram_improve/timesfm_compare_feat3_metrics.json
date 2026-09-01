@@ -1,0 +1,37 @@
+{
+  "feature_idx": 3,
+  "feature_name": "num_unique_dst_ports",
+  "target_len": 998,
+  "metrics": [
+    {
+      "variant": "ary_base",
+      "mse": 1661.57666015625,
+      "mae": 14.910642623901367,
+      "n_covered": 960
+    },
+    {
+      "variant": "ary_V8",
+      "mse": 6492.2392578125,
+      "mae": 29.186859130859375,
+      "n_covered": 960
+    },
+    {
+      "variant": "ary_V10",
+      "mse": 3414.190185546875,
+      "mae": 24.498746871948242,
+      "n_covered": 960
+    },
+    {
+      "variant": "timesfm",
+      "mse": 1458.0081787109375,
+      "mae": 12.488134384155273,
+      "n_covered": 960
+    },
+    {
+      "variant": "timesfm_ram",
+      "mse": 6839.6357421875,
+      "mae": 32.23536682128906,
+      "n_covered": 960
+    }
+  ]
+}

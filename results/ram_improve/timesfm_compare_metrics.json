@@ -1,0 +1,36 @@
+{
+  "feature_idx": 0,
+  "target_len": 998,
+  "metrics": [
+    {
+      "variant": "ary_base",
+      "mse": 92095.546875,
+      "mae": 119.95216369628906,
+      "n_covered": 960
+    },
+    {
+      "variant": "ary_V8",
+      "mse": 148459.515625,
+      "mae": 233.20533752441406,
+      "n_covered": 960
+    },
+    {
+      "variant": "ary_V10",
+      "mse": 131789.3125,
+      "mae": 220.0534210205078,
+      "n_covered": 960
+    },
+    {
+      "variant": "timesfm",
+      "mse": 35294.25,
+      "mae": 78.9742202758789,
+      "n_covered": 960
+    },
+    {
+      "variant": "timesfm_ram",
+      "mse": 144563.5625,
+      "mae": 243.0402069091797,
+      "n_covered": 960
+    }
+  ]
+}

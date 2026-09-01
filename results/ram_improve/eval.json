@@ -1,0 +1,134 @@
+[
+  {
+    "variant": "V0_frozen",
+    "binary_f1": 0.6956521739130435,
+    "binary_precision": 0.975609756097561,
+    "binary_recall": 0.5405405405405406,
+    "binary_fpr": 0.003067484662576687,
+    "mitre_f1_macro": 0.878960791942247,
+    "dynamics_mse": 258.176137534827,
+    "elapsed_sec": 2.4,
+    "n_steps": 400
+  },
+  {
+    "variant": "V1_ttt_mse",
+    "binary_f1": 0.7068965517241379,
+    "binary_precision": 0.9761904761904762,
+    "binary_recall": 0.5540540540540541,
+    "binary_fpr": 0.003067484662576687,
+    "mitre_f1_macro": 0.878960791942247,
+    "dynamics_mse": 258.1721059907228,
+    "elapsed_sec": 6.1,
+    "n_steps": 400
+  },
+  {
+    "variant": "V2_ttt_multitask",
+    "binary_f1": 0.6896551724137931,
+    "binary_precision": 0.9523809523809523,
+    "binary_recall": 0.5405405405405406,
+    "binary_fpr": 0.006134969325153374,
+    "mitre_f1_macro": 0.8674332483176991,
+    "dynamics_mse": 258.1753562861774,
+    "elapsed_sec": 6.1,
+    "n_steps": 400
+  },
+  {
+    "variant": "V3_mt_mem_raw_k1",
+    "binary_f1": 0.7468354430379747,
+    "binary_precision": 0.7023809523809523,
+    "binary_recall": 0.7972972972972973,
+    "binary_fpr": 0.07668711656441718,
+    "mitre_f1_macro": 0.9181627538233339,
+    "dynamics_mse": 258.1751122299302,
+    "elapsed_sec": 8.1,
+    "n_steps": 400
+  },
+  {
+    "variant": "V4_mt_mem_hidden_k1",
+    "binary_f1": 0.7210884353741497,
+    "binary_precision": 0.726027397260274,
+    "binary_recall": 0.7162162162162162,
+    "binary_fpr": 0.06134969325153374,
+    "mitre_f1_macro": 0.920338825528751,
+    "dynamics_mse": 258.175007498723,
+    "elapsed_sec": 6.6,
+    "n_steps": 400
+  },
+  {
+    "variant": "V5_mt_mem_hidden_k5",
+    "binary_f1": 0.6779661016949152,
+    "binary_precision": 0.9090909090909091,
+    "binary_recall": 0.5405405405405406,
+    "binary_fpr": 0.012269938650306749,
+    "mitre_f1_macro": 0.8674332483176991,
+    "dynamics_mse": 258.1747491677129,
+    "elapsed_sec": 6.7,
+    "n_steps": 400
+  },
+  {
+    "variant": "V6_mem_only_hidden_k5",
+    "binary_f1": 0.6896551724137931,
+    "binary_precision": 0.9523809523809523,
+    "binary_recall": 0.5405405405405406,
+    "binary_fpr": 0.006134969325153374,
+    "mitre_f1_macro": 0.878960791942247,
+    "dynamics_mse": 258.176137534827,
+    "elapsed_sec": 1.3,
+    "n_steps": 400
+  },
+  {
+    "variant": "V7_ttt_mse_mem_raw_k1",
+    "binary_f1": 0.7515923566878981,
+    "binary_precision": 0.7108433734939759,
+    "binary_recall": 0.7972972972972973,
+    "binary_fpr": 0.0736196319018405,
+    "mitre_f1_macro": 0.9227112880163852,
+    "dynamics_mse": 258.1730734531442,
+    "elapsed_sec": 8.3,
+    "n_steps": 400
+  },
+  {
+    "variant": "V8_frozen_mem_raw_k1",
+    "binary_f1": 0.7515923566878981,
+    "binary_precision": 0.7108433734939759,
+    "binary_recall": 0.7972972972972973,
+    "binary_fpr": 0.0736196319018405,
+    "mitre_f1_macro": 0.9227112880163852,
+    "dynamics_mse": 258.176137534827,
+    "elapsed_sec": 2.6,
+    "n_steps": 400
+  },
+  {
+    "variant": "V9_ttt_mse_mem_hidden_k1",
+    "binary_f1": 0.7346938775510204,
+    "binary_precision": 0.7397260273972602,
+    "binary_recall": 0.7297297297297297,
+    "binary_fpr": 0.05828220858895705,
+    "mitre_f1_macro": 0.9415818053877507,
+    "dynamics_mse": 258.17237152356887,
+    "elapsed_sec": 6.6,
+    "n_steps": 400
+  },
+  {
+    "variant": "V10_mt_mem_hidden_k3",
+    "binary_f1": 0.7317073170731707,
+    "binary_precision": 0.9183673469387755,
+    "binary_recall": 0.6081081081081081,
+    "binary_fpr": 0.012269938650306749,
+    "mitre_f1_macro": 0.8674332483176991,
+    "dynamics_mse": 258.17501469655895,
+    "elapsed_sec": 6.7,
+    "n_steps": 400
+  },
+  {
+    "variant": "V11_frozen_mem_hidden_k1",
+    "binary_f1": 0.7346938775510204,
+    "binary_precision": 0.7397260273972602,
+    "binary_recall": 0.7297297297297297,
+    "binary_fpr": 0.05828220858895705,
+    "mitre_f1_macro": 0.9415818053877507,
+    "dynamics_mse": 258.176137534827,
+    "elapsed_sec": 1.4,
+    "n_steps": 400
+  }
+]

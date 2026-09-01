@@ -47,15 +47,23 @@ scripts/
   train_temporal_forecaster_ctx60.py   # trains it with context=60/horizon=40 (matches the kill-chain benchmark)
   adaptive_memory_forecaster.py        # RAM.01 core: EpisodicMemoryBank + OnlineAdaptive (TTT) + the v5 experiment
   ram01_kill_chain_eval.py             # the v6 benchmark: RAM.01 vs frozen GRU on a synthetic 1000-step multi-attack timeline
-src/pipeline/
-  features_v2.py, extract_aryan.py     # feature-name lists only (FEATURE_COLS_V2 / FEATURE_COLS_ARYAN), used for plot labels
-data/processed/
-  forecast_captures.pkl                # precomputed per-flow trajectories (train/val/test split, two feature schemas: "v2" and "amt")
+  ram_improve_eval.py                  # ARY.01 RAM variant sweep (V0–V11): TTT loss, memory keys, k-NN classify-blend
+  ram_1000step_eval.py                 # 1000-step kill-chain P(attack) comparison: base vs orig RAM vs V8 vs V10
+  timesfm_ram_compare.py               # ARY base/V8/V10 vs Google TimesFM-3 (+ RAM-wrapped TimesFM) on feature forecasts
+src/aryan/
+  world_model.py, components.py, ...   # ARY.01 242-d temporal transformer backbone RAM wraps in the v7+ experiments
+  timeline.py                          # synthetic kill-chain splice builder (shared by eval scripts)
+data/aryan_splits/                     # CIC-IDS-2018 train/val/test NPZ windows for ARY-RAM evals
 models/checkpoints/
   forecast_v2_temporal*.pth, forecast_amt_temporal_ctx60.pth   # trained GRU backbone weights
+  aryan_world_model_best.pt            # frozen ARY.01 checkpoint used by ram_improve_eval / timesfm_ram_compare
 results/forecast/
   v5_adaptive_memory/                  # first RAM.01 prototype results (context=20/horizon=20)
   v6_ram01_killchain/                  # RAM.01 vs frozen models on the synthetic kill-chain (context=60/horizon=40)
+results/ram_improve/
+  eval.json                            # V0–V11 binary-F1 / MITRE-F1 sweep on held-out test windows
+  1000step_*.png/json                  # 1000-step P(attack) timeline: base vs orig RAM vs V8 vs V10
+  timesfm_compare_*.png/json           # feature-forecast MSE vs Google TimesFM-3 (+ timesfm_ram)
 ```
 
 ## Results so far
@@ -104,6 +112,40 @@ Per-segment MSE (RAM.01 vs. frozen, same schema):
 Memory picked up 19 surprise events across the run, 13 produced a confident
 match, 9/13 (69%) were the correct class — consistent with the v5 finding.
 
+### v7 — ARY.01 backbone + RAM V8/V10 (context=20, classify-blend fix)
+
+Wrapped the frozen **ARY.01** temporal transformer (242-d CIC features) with
+the RAM episodic memory + test-time training layer. Key finding from the
+dashboard bug post-mortem: the original RAM only blended memory into *dynamics*
+forecasts, not into the classification heads — so attack detection barely moved.
+
+Fix: blend k-NN memory votes directly into `P(attack)` and `P(mitre)`:
+
+| variant | TTT | memory keys | k | binary F1 (test) |
+|---------|-----|-------------|---|-----------------:|
+| V0 frozen | — | — | — | 0.696 |
+| V1 orig RAM (TTT-MSE only) | MSE | — | — | ~0.697 |
+| **V8** (memory-only) | — | raw window | 1 | **0.724** |
+| **V10** (best combo) | multi-task | hidden state | 3 | **0.731** |
+
+See `results/ram_improve/eval.json` and `1000step_comparison.png` for the full
+1000-step kill-chain timeline (P(attack) panels with ground-truth attack bands).
+
+### v8 — TimesFM-3 baseline (feature forecast, dynamics-blend RAM)
+
+Compared ARY base/V8/V10 against Google's **TimesFM-3** foundation model
+(330M params, zero-shot) on the same 1000-step timeline, forecasting single
+242-d features with the black ground-truth line overlaid:
+
+| feature | winner (MSE) | notes |
+|---------|-------------|-------|
+| `[0] num_flows` (highest variance) | **timesfm** (35k vs ARY 92k) | all models flatten spikes; RAM continuation-blend hurts MSE |
+| `[3] num_unique_dst_ports` (2nd highest) | **timesfm** (1.46k vs ARY 1.66k) | smoother signal; same ranking |
+
+RAM's *continuation-blend* (the original v5/v6 design) still degrades feature
+MSE when applied to TimesFM or ARY dynamics rollouts — the classify-blend fix
+(V8/V10) is the one that helps attack detection. See `timesfm_compare_*.png`.
+
 **Honest takeaway:** the gains are real but modest, and concentrated on the
 *attack* segments (where the "recognize a recurring shape" mechanism has
 something to grab onto) rather than benign background (which doesn't repeat
@@ -143,6 +185,16 @@ python -m scripts.adaptive_memory_forecaster
 
 # the v6 kill-chain benchmark (context=60/horizon=40, ~1000-step synthetic session)
 python -m scripts.ram01_kill_chain_eval
+
+# v7: ARY.01 RAM variant sweep + 1000-step P(attack) comparison
+python -m scripts.ram_improve_eval
+python -m scripts.ram_1000step_eval
+
+# v8: ARY vs Google TimesFM-3 feature forecast (default: highest-variance dim)
+python -m scripts.timesfm_ram_compare
+python -m scripts.timesfm_ram_compare --feature-rank 2   # second-highest variance
+python -m scripts.timesfm_ram_compare --feature-idx 3  # explicit feature index
 ```
 
-Outputs (plots + JSON summaries) are written under `results/forecast/`.
+Outputs (plots + JSON summaries) are written under `results/forecast/` and
+`results/ram_improve/`.
