@@ -57,6 +57,9 @@ src/aryan/
   timeline.py                          # synthetic kill-chain splice builder (shared by eval scripts)
 docs/
   RAMX_V01.md                          # RAMX_V.01 design, API, and empirical notes
+  RAMX_V02.md                          # RAMX_V.02 context-gated calibrator (PRISM V2 / Shaun path)
+src/prediction/
+  ramx_v02.py                          # WarmupBaselineCalibrator + context-gated RAMXPredictor (v2.0)
 data/aryan_splits/                     # CIC-IDS-2018 train/val/test NPZ windows for ARY-RAM evals
 models/checkpoints/
   forecast_v2_temporal*.pth, forecast_amt_temporal_ctx60.pth   # trained GRU backbone weights
@@ -170,6 +173,20 @@ models (SHNV adapter) or FM hybrids on raw-window keys.
 python -m scripts.ramx_v01_eval.py
 python -m scripts.ramx_v01_eval.py --timeline   # + 1000-step kill-chain plots
 ```
+
+### v10 — RAMX_V.02 (context-gated warmup calibrator, PRISM V2)
+
+Follow-up for **Shaun's 292-d StateTransformer** on SchemaAligner-ingested lab
+PCAPs. Fixes false-positive fusion during prepended CIC warmup context.
+See [`docs/RAMX_V02.md`](docs/RAMX_V02.md).
+
+| variant | mean F1 (138 lab PCAPs) | warmup mean P |
+|---|---:|---:|
+| Shaun V2 + RAMX v1 (no gate) | 0.713 | 0.185 |
+| **Shaun V2 + RAMX v2** | **1.000** | **0.156** (base only) |
+
+Module: `src/prediction/ramx_v02.py` (`RAMX_VERSION = "2.0"`). Upstream:
+`PRISM` branch `origin/shaun`.
 
 **Honest takeaway:** the gains are real but modest, and concentrated on the
 *attack* segments (where the "recognize a recurring shape" mechanism has
